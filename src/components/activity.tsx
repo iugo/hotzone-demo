@@ -2,10 +2,11 @@ import * as React from "react";
 import { useState } from "react";
 import { Activity, Hotzone } from "../types";
 import { isSingle, isHotzone } from "../type-check";
+import { out } from "../functions";
 
 function wxTo(url: string) {
   // TODO: 微信小程序跳轉
-  console.log(`链接跳转至 ${url}`);
+  alert(`链接跳转至 ${url}`);
 }
 
 export function ActivityRender(props: { activity: Activity }) {
@@ -28,7 +29,28 @@ export function ActivityRender(props: { activity: Activity }) {
 
         if (isHotzone(v)) {
           return (
-            <div key={i}>
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                position: "sticky"
+              }}
+            >
+              {v.hotzone.map((v, i) => (
+                <div
+                  key={i}
+                  style={{
+                    position: "absolute",
+                    left: v.position[0],
+                    top: v.position[1],
+                    width: v.widthHeight[0],
+                    height: v.widthHeight[1]
+                  }}
+                  onClick={() => {
+                    wxTo(v.link);
+                  }}
+                />
+              ))}
               <img alt="" src={v.imageUrl} />
             </div>
           );
@@ -41,12 +63,19 @@ export function ActivityRender(props: { activity: Activity }) {
 
 export function SelectHotzone(props: {
   imageUrl: string;
-  hotzoneChangeCallback: (
-    v: Hotzone[],
-    options?: { width: number; height: number }
+  prevHotzones: Hotzone[];
+  addHotzoneCallback: (
+    newHotzone: Hotzone,
+    options: { width: number; height: number }
   ) => void;
+  removeHotzoneCallback: (i: number) => void;
 }) {
-  const { imageUrl, hotzoneChangeCallback } = props;
+  const {
+    imageUrl,
+    prevHotzones,
+    addHotzoneCallback,
+    removeHotzoneCallback
+  } = props;
   /** 是否在拖动状态 */
   const [isDrop, setIsDrop] = useState(false);
   /** 储存之前的坐标, 用于计算宽高 */
@@ -56,12 +85,7 @@ export function SelectHotzone(props: {
   /** 热区宽高 */
   const [widthHeight, setWidthHeight] = useState([0, 0] as [number, number]);
   /** 当前热区数据 */
-  const [hotzone, setHotzone] = useState([] as Hotzone[]);
-
-  function changeHotzone(v: Hotzone[], options?) {
-    setHotzone(v);
-    hotzoneChangeCallback(v, options);
-  }
+  const [hotzone, setHotzone] = useState(prevHotzones);
 
   function clickHandler(e: React.MouseEvent) {
     const target = e.currentTarget;
@@ -69,22 +93,26 @@ export function SelectHotzone(props: {
       throw new Error("程序有误, event target should be HTMLElement");
     }
     if (!isDrop) {
-      console.log("begin", e.type);
+      out("begin", e.type);
       const x = e.pageX - target.offsetLeft;
       const y = e.pageY - target.offsetTop;
       setClickXY([e.pageX, e.pageY]);
       setPosition([x, y]);
-      // console.log("setPosition", [x, y]);
+      // out("setPosition", [x, y]);
     } else {
-      console.log("end", e.type);
-      changeHotzone(
-        [
-          ...hotzone,
-          {
-            position,
-            widthHeight
-          }
-        ],
+      out("end", e.type);
+      setHotzone([
+        ...hotzone,
+        {
+          position,
+          widthHeight
+        }
+      ]);
+      addHotzoneCallback(
+        {
+          position,
+          widthHeight
+        },
         {
           width: target.querySelector("img").width,
           height: target.querySelector("img").height
@@ -92,9 +120,9 @@ export function SelectHotzone(props: {
       );
       setWidthHeight([0, 0]);
     }
-    console.log("page X Y", [e.pageX, e.pageY]);
-    console.log("target", target);
-    console.log("target X Y", [target.offsetLeft, target.offsetTop]);
+    out("page X Y", [e.pageX, e.pageY]);
+    out("target", target);
+    out("target X Y", [target.offsetLeft, target.offsetTop]);
     setIsDrop(!isDrop);
   }
 
@@ -149,7 +177,9 @@ export function SelectHotzone(props: {
           区域 {JSON.stringify(v)}{" "}
           <span
             onClick={() => {
-              changeHotzone(hotzone.filter((it, i2) => i !== i2));
+              const newData = hotzone.filter((it, i2) => i !== i2);
+              setHotzone(newData);
+              removeHotzoneCallback(i);
             }}
           >
             删除

@@ -12,7 +12,7 @@ const activities: Activity[] = [
       },
       {
         imageUrl: "https://i.imgur.com/H37kxPH.jpg",
-        hotzone: []
+        hotzone: [{ position: [351, 693], widthHeight: [92, 79], link: "ppp" }]
       }
     ]
   }
