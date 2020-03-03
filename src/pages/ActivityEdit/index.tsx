@@ -4,6 +4,7 @@ import { useParams } from "react-router";
 import { getActivity } from "../../models/api";
 import { Activity } from "../../types";
 import { isSingle, isHotzone } from "../../type-check";
+import { SelectHotzone } from "../../components/activity";
 
 /** 编辑活动页面 */
 export default function ActivityEdit() {
@@ -34,10 +35,10 @@ export default function ActivityEdit() {
             <div key={i}>
               <img alt="" src={v.imageUrl} />
               <p>
-                编辑图片: <input value={v.imageUrl} />
+                编辑图片: <input value={v.imageUrl} onChange={() => 1} />
               </p>
               <p>
-                编辑链接: <input value={v.link} />
+                编辑链接: <input value={v.link} onChange={() => 1} />
               </p>
             </div>
           );
@@ -45,9 +46,13 @@ export default function ActivityEdit() {
 
         if (isHotzone(v)) {
           return (
-            <div key={i}>
-              <img alt="" src={v.imageUrl} />
-            </div>
+            <SelectHotzone
+              key={i}
+              imageUrl={v.imageUrl}
+              hotzoneChangeCallback={v => {
+                console.log("hotzoneChangeCallback", v);
+              }}
+            />
           );
         }
         return <div key={i}>無效數據: {JSON.stringify(v)}</div>;
