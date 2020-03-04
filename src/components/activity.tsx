@@ -101,6 +101,10 @@ export function SelectHotzone(props: {
       // out("setPosition", [x, y]);
     } else {
       out("end", e.type);
+      const theImg = target.querySelector("img");
+      if (!theImg) {
+        throw new Error("程序有误, 没有找到 img DOM");
+      }
       setHotzone([
         ...hotzone,
         {
@@ -114,8 +118,8 @@ export function SelectHotzone(props: {
           widthHeight
         },
         {
-          width: target.querySelector("img").width,
-          height: target.querySelector("img").height
+          width: theImg.width,
+          height: theImg.height
         }
       );
       setWidthHeight([0, 0]);
