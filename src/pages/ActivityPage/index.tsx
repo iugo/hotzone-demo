@@ -10,9 +10,13 @@ import "./style.css";
 export default function ActivityPage() {
   const [activity, setActivity] = React.useState({} as Activity);
   const [loading, setLoading] = React.useState(true);
-  let { activityId } = useParams();
+  const { activityId } = useParams();
   React.useEffect(() => {
     console.log("调取 API 一次");
+    if (!activityId) {
+      // TODO: 错误处理
+      return;
+    }
     getActivity(activityId)
       .then(setActivity)
       .catch() // TODO: 错误处理

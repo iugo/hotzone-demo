@@ -3,7 +3,7 @@ import { useParams } from "react-router";
 import update from "immutability-helper";
 
 import { getActivity } from "../../models/api";
-import { Activity } from "../../types";
+import { Activity, ActivityImage, HotzoneWithLink } from "../../types";
 import { isSingle, isHotzone } from "../../type-check";
 import { SelectHotzone } from "../../components/activity";
 
@@ -11,9 +11,13 @@ import { SelectHotzone } from "../../components/activity";
 export default function ActivityEdit() {
   const [activity, setActivity] = React.useState({} as Activity);
   const [loading, setLoading] = React.useState(true);
-  let { activityId } = useParams();
+  const { activityId } = useParams();
   React.useEffect(() => {
     console.log("调取 API 一次");
+    if (!activityId) {
+      setLoading(false);
+      return;
+    }
     getActivity(activityId)
       .then(setActivity)
       .catch() // TODO: 错误处理
@@ -53,16 +57,19 @@ export default function ActivityEdit() {
               prevHotzones={v.hotzone}
               addHotzoneCallback={newHotzone => {
                 console.log("hotzoneChangeCallback", newHotzone);
+                const link = prompt("请输入链接");
+                if (!link) {
+                  throw new Error("必须输入链接");
+                }
+                const newHot: HotzoneWithLink = {
+                  ...newHotzone,
+                  link
+                };
                 const newData = update(activity, {
                   images: {
                     [i]: {
                       hotzone: {
-                        $push: [
-                          {
-                            ...newHotzone,
-                            link: prompt("请输入链接")
-                          }
-                        ]
+                        $push: [newHot]
                       }
                     }
                   }
@@ -92,14 +99,16 @@ export default function ActivityEdit() {
         onClick={() => {
           const link = prompt("请输入图片链接");
           console.log("activity", activity);
+          if (!link) {
+            throw new Error("必须输入图片链接");
+          }
+          const img: ActivityImage = {
+            imageUrl: link,
+            hotzone: []
+          };
           const newData = update(activity, {
             images: {
-              $push: [
-                {
-                  imageUrl: link,
-                  hotzone: []
-                }
-              ]
+              $push: [img]
             }
           });
           setActivity(newData);

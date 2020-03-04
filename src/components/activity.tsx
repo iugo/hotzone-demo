@@ -130,7 +130,7 @@ export function SelectHotzone(props: {
     setIsDrop(!isDrop);
   }
 
-  function moveHandler(e) {
+  function moveHandler(e: React.PointerEvent) {
     if (isDrop) {
       // console.log("pageX", e.pageX);
       // console.log("pageY", e.pageY);

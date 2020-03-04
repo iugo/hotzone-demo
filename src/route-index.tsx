@@ -38,7 +38,7 @@ function Home() {
   );
 }
 
-function About(props) {
+function About() {
   return (
     <div>
       <h2>About</h2>
