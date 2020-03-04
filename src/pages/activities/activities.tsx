@@ -18,6 +18,8 @@ export default function Activities() {
             <Link to={`/activity/${v.id}`}>Open</Link>
             {" | "}
             <Link to={`/edit-activity/${v.id}`}>Edit</Link>
+            {" | "}
+            <Link to={`/activity/${v.id}?u=123`}>Share</Link>
           </div>
         );
       })}
